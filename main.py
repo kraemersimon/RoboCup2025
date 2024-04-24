@@ -275,4 +275,4 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.destroyAllWindows()
         ser.close()
         break
-# ini de beninging
+# test 
