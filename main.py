@@ -124,33 +124,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     if contours_blk_len > 0:
         x_blk, y_blk, w_blk, h_blk = cv2.boundingRect(contours_blk[0])
         centerx_blk = x_blk + (w_blk / 2)
-        #centery_blk = y_blk + (h_blk / 2)
-        if contours_blk_len == 1:
-            blackbox = cv2.minAreaRect(contours_blk[0])
-        else:
-            canditates=[]
-            off_bottom = 0    
-            for con_num in range(contours_blk_len):        
-                blackbox = cv2.minAreaRect(contours_blk[con_num])
-                (x_min, y_min), (w_min, h_min), ang = blackbox        
-                box = cv2.boxPoints(blackbox)
-                (x_box,y_box) = box[0]
-                if y_box > 198:        
-                    off_bottom += 1
-                canditates.append((y_box,con_num,x_min,y_min))        
-            canditates = sorted(canditates)
-            if off_bottom > 1:    
-                canditates_off_bottom=[]
-                for con_num in range ((contours_blk_len - off_bottom), contours_blk_len):
-                    (y_highest,con_highest,x_min, y_min) = canditates[con_num]        
-                    total_distance = (abs(x_min - x_last)*2 + abs(y_min - y_last)*2)*0.5
-                    canditates_off_bottom.append((total_distance,con_highest))
-                canditates_off_bottom = sorted(canditates_off_bottom)
-                (total_distance,con_highest) = canditates_off_bottom[0]
-                blackbox = cv2.minAreaRect(contours_blk[con_highest])    
-            else:        
-                (y_highest,con_highest,x_min, y_min) = canditates[contours_blk_len-1]        
-                blackbox = cv2.minAreaRect(contours_blk[con_highest])    
+        blackbox = cv2.minAreaRect(contours_blk[0])
         (x_min, y_min), (w_min, h_min), ang = blackbox
         x_last = x_min
         y_last = y_min
@@ -163,8 +137,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         setpoint = 80
         error = int(x_min - setpoint)
         ang = int(ang)
-        #send_motor_command(LEFT_MOTOR, 1 if error > 0 else 0, abs(error))  # Steuerung des linken Motors basierend auf dem Fehler
-        #send_motor_command(RIGHT_MOTOR, 1 if error < 0 else 0, abs(error))  # Steuerung des rechten Motors basierend auf dem Fehler
 
         box = cv2.boxPoints(blackbox)
         box = np.int0(box)
