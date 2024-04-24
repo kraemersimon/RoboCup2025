@@ -244,8 +244,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.imshow("black", Blackline)       
         cv2.imshow("green", Greensign)
         cv2.imshow("red", RedLine)
-        print("Schwarz_Breite:", w_blk)
-        #print("Rot_Breite:", w_red)
+        print("Schwarz_Breite:", w_blk, "Rot_Breite:", w_red)
         print("Ignore Green:", Green_ignored)
         print("FPS:", str(int(number_of_frames / (time.time() - start_time))), "Error:", error)
 
@@ -275,4 +274,3 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.destroyAllWindows()
         ser.close()
         break
-# test 
