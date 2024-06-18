@@ -9,7 +9,7 @@ import serial
 #Settings
 ResX, ResY = 640, 480 #Set resolution here
 FPS = 200 #Set a FPS cap here (Note that it caps the FPS)
-Debug = True
+Debug = False
 Show_Fps = True
 BASE_SPEED = 80
 SENSITIVITY = 3
@@ -88,6 +88,32 @@ def button_obstacle_pressed():
 
 #Main Loop
 while True:
+    #The Buttons
+    if button_rst_pressed():
+        m(0, 0, 0)
+        time.sleep(3)
+        while not button_rst_pressed():
+            pass
+        time.sleep(3)
+       
+    if button_obstacle_pressed():
+        if Left_dose:
+            m(-100, -100, 450)
+            m(-255, 255, 300)
+            m(160, 60, 3600)
+            m(-255, 255, 360)
+            m(-100, -100, 600)
+            Left_dose = False
+
+        elif Left_dose == False:
+            m(-100, -100, 450)
+            m(255, -255, 300)
+            m(60, 160, 3500)
+            m(255, -255, 360)
+            m(-100, -100, 600)
+            Left_dose = True
+            
+
     Img_Cam = picam.capture_array()
     
     Blackline = cv2.inRange(Img_Cam, (0, 0, 0), (230, 80, 100))
