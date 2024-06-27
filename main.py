@@ -4,11 +4,11 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 import serial
-
+from libcamera import controls
 
 #Settings
-ResX, ResY = 640, 480 #Set resolution here
-FPS = 200 #Set a FPS cap here (Note that it caps the FPS)
+ResX, ResY = 1532, 96 #Set resolution here
+FPS = 1000 #Set a FPS cap here (Note that it caps the FPS)
 Debug = False
 Show_Fps = True
 BASE_SPEED = 80
@@ -17,9 +17,9 @@ SENSITIVITY = 3
 #Camera stuff
 picam = Picamera2(0)
 #webcam = Picamera2(1)
-config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (640, 480)})
+config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (1532, 864)})
 picam.configure(config)
-picam.set_controls({"FrameRate": FPS})
+picam.set_controls({"FrameRate": FPS, "AfMode": controls.AfModeEnum.Continuous})
 
 #GPIO stuff
 PIN_RST_BUTTON = 10
@@ -88,6 +88,7 @@ def button_obstacle_pressed():
 
 #Main Loop
 while True:
+    
     #The Buttons
     if button_rst_pressed():
         m(0, 0, 0)
