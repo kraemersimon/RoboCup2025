@@ -2,7 +2,7 @@ import cv2
 from picamera2 import Picamera2
 import time
 import numpy as np
-import RPi.GPIO as GPIO
+from gpiozero import Button
 import serial
 from libcamera import controls
 
@@ -24,9 +24,8 @@ picam.set_controls({"FrameRate": FPS, "AfMode": controls.AfModeEnum.Continuous})
 #GPIO stuff
 PIN_RST_BUTTON = 10
 PIN_OBSTACLE_BUTTON = 22
-GPIO.setmode(GPIO.BCM)     # set up BCM GPIO numbering  
-GPIO.setup(PIN_RST_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(PIN_OBSTACLE_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+button_rst = Button(PIN_RST_BUTTON)
+button_obstacle = Button(PIN_OBSTACLE_BUTTON)
 LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
@@ -81,10 +80,10 @@ def m(left, right, duration):
         send_motor_command(RIGHT_MOTOR, 1, 0)
 
 def button_rst_pressed():
-    return GPIO.input(PIN_RST_BUTTON)
+    return button_rst.is_pressed
 
 def button_obstacle_pressed():
-    return GPIO.input(PIN_OBSTACLE_BUTTON)
+    return button_obstacle.is_pressed
 
 #Main Loop
 while True:
