@@ -7,30 +7,34 @@ import serial
 from libcamera import controls
 
 #Settings
-ResX, ResY = 1532, 96 #Set resolution here
-FPS = 1000 #Set a FPS cap here (Note that it caps the FPS)
+ResX, ResY = 1536, 96 #Set resolution here
+FPS = 200 #Set a FPS cap here
 Debug = False
 Show_Fps = True
 BASE_SPEED = 80
 SENSITIVITY = 3
+Raw_Cap_Mode = 1 #Set the picam SENSOR MODE here. '1' = 1532x864; '2' = 2304x1296; 3 = 4608x2592
 
 #Camera stuff
 picam = Picamera2(0)
 #webcam = Picamera2(1)
-config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (1532, 864)})
+if Raw_Cap_Mode == 1:    
+    config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (1536, 864)})
+elif Raw_Cap_Mode == 2:
+    config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (2304, 1296)})   
+elif Raw_Cap_Mode == 3:
+    config = picam.create_video_configuration(main={"size": (ResX, ResY), "format": "RGB888"}, raw={"size": (4608, 2592)})
 picam.configure(config)
 picam.set_controls({"FrameRate": FPS, "AfMode": controls.AfModeEnum.Continuous})
 
 #GPIO stuff
-PIN_RST_BUTTON = 10
-PIN_OBSTACLE_BUTTON = 22
-button_rst = Button(PIN_RST_BUTTON)
-button_obstacle = Button(PIN_OBSTACLE_BUTTON)
+button_rst = Button(10)
+button_obstacle = Button(22)
 LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
 #Arduino stuff
-ser = serial.Serial('/dev/ttyUSB0', 115200)
+ser = serial.serial('/dev/ttyUSB0', 115200)
 time.sleep(2) # wait for Nano to reboot
 
 #FPS counter variables
@@ -39,14 +43,23 @@ start_time = time.time()
 
 #Resizing Windows (for better performance)
 if Debug:    
+    WX, WY = 400, ResY
     cv2.namedWindow("Image from camera", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Image from camera", ResX, ResY)
+    time.sleep(0.1)
+    cv2.resizeWindow("Image from camera", WX, WY)
+    time.sleep(0.1)
     cv2.namedWindow("Blackline", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Blackline", ResX, ResY)
+    time.sleep(0.1)
+    cv2.resizeWindow("Blackline", WX, WY)
+    time.sleep(0.1)
     cv2.namedWindow("Greensign", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Greensign", ResX, ResY)
+    time.sleep(0.1)
+    cv2.resizeWindow("Greensign", WX, WY)
+    time.sleep(0.1)
     cv2.namedWindow("RedLine", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("RedLine", ResX, ResY)
+    time.sleep(0.1)
+    cv2.resizeWindow("RedLine", WX, WY)
+    time.sleep(0.1)
 
 #Stuff for the programm
 kernel = np.ones((3, 3), np.uint8)
@@ -79,24 +92,18 @@ def m(left, right, duration):
         send_motor_command(LEFT_MOTOR, 1, 0)
         send_motor_command(RIGHT_MOTOR, 1, 0)
 
-def button_rst_pressed():
-    return button_rst.is_pressed
-
-def button_obstacle_pressed():
-    return button_obstacle.is_pressed
-
 #Main Loop
 while True:
     
     #The Buttons
-    if button_rst_pressed():
+    if button_rst.is_pressed:
         m(0, 0, 0)
         time.sleep(3)
-        while not button_rst_pressed():
+        while not button_rst.is_pressed:
             pass
         time.sleep(3)
        
-    if button_obstacle_pressed():
+    if button_obstacle.is_pressed:
         if Left_dose:
             m(-100, -100, 450)
             m(-255, 255, 300)
@@ -105,7 +112,7 @@ while True:
             m(-100, -100, 600)
             Left_dose = False
 
-        elif Left_dose == False:
+        else:
             m(-100, -100, 450)
             m(255, -255, 300)
             m(60, 160, 3500)
@@ -151,7 +158,7 @@ while True:
         box = cv2.boxPoints(blackbox)
         box = np.int0(box)
         cv2.drawContours(Img_Cam, [box], 0, (0, 0, 255), 3)
-        cv2.line(Img_Cam, (int(x_min), 200), (int(x_min), 250), (255, 0, 0), 3)
+        cv2.line(Img_Cam, (int(x_min), ResY // 2 - ResY // 5), (int(x_min), ResY // 2 + ResY // 5), (255, 0, 0), 3)
         
         m(BASE_SPEED + (SENSITIVITY * error), BASE_SPEED - (SENSITIVITY * error), 0)
         
@@ -170,7 +177,6 @@ while True:
     
     #All Turns
     if w_blk < (ResX - 10) and w_blk > 60 and not Green_ignored:
-        countergreen = 0
         Green_ignored = True
         if h_blk > 70: 
             print("Boosting: ")
@@ -257,5 +263,7 @@ while True:
 
     if cv2.waitKey(1) == ord("q"):
         picam.close()
+        button_rst.close()
+        button_obstacle.close()
         cv2.destroyAllWindows()
         break
