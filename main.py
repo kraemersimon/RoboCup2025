@@ -9,7 +9,7 @@ from libcamera import controls
 #Settings
 ResX, ResY = 1536, 96 #Set resolution here
 FPS = 200 #Set a FPS cap here
-Debug = True
+Debug = False
 Show_Fps = True
 BASE_SPEED = 80
 SENSITIVITY = 3
