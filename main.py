@@ -9,7 +9,7 @@ from libcamera import controls
 #Settings
 ResX, ResY = 1536, 96 #Set resolution here
 FPS = 200 #Set a FPS cap here
-Debug = False
+Debug = True
 Show_Fps = True
 BASE_SPEED = 80
 SENSITIVITY = 3
@@ -179,7 +179,7 @@ while True:
     if w_blk < (ResX - 10) and w_blk > 60 and not Green_ignored:
         Green_ignored = True
         if h_blk > 70: 
-            print("Boosting: ")
+            print("Boosting: Turn without green")
             m(255, 255, 150)
             Green_ignored = False
     
@@ -200,7 +200,7 @@ while True:
                 cv2.rectangle(Img_Cam, (x_grn, y_grn), (x_grn + w_grn, y_grn + h_grn), (255, 0, 0), 2)
                 
         elif w_blk > 150:
-            print("Go straight")
+            print("Boosting: Turn without green")
             m(255, 255, 500)
         
             
@@ -224,6 +224,7 @@ while True:
 
     if new_sec:
         if w_blk_old > w_blk * 0.95 and w_blk_old < w_blk * 1.05:
+            print("Boosting: Stuck")
             m(-255, 255, 100)
             m(255, -255, 100)
             SENSITIVITY = 4
@@ -253,7 +254,6 @@ while True:
 
 
     #Timer
-    #1 sec
     if (time.time() - sec_track) > 1:
         new_sec = True
         sec_track = time.time()   
