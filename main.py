@@ -34,7 +34,7 @@ LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
 #Arduino stuff
-ser = serial.serial('/dev/ttyUSB0', 115200)
+ser = serial.Serial('/dev/ttyUSB0', 115200)
 time.sleep(2) # wait for Nano to reboot
 
 #FPS counter variables
