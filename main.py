@@ -11,6 +11,7 @@ ResX, ResY = 1536, 96 #Set resolution here
 FPS = 200 #Set a FPS cap here
 Debug = False
 Show_Fps = True
+Motors = False
 BASE_SPEED = 80
 SENSITIVITY = 3
 Raw_Cap_Mode = 1 #Set the picam SENSOR MODE here. '1' = 1532x864; '2' = 2304x1296; 3 = 4608x2592
@@ -34,8 +35,9 @@ LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
 #Arduino stuff
-ser = serial.Serial('/dev/ttyUSB0', 115200)
-time.sleep(2) # wait for Nano to reboot
+if Motors:
+    ser = serial.Serial('/dev/ttyUSB0', 115200)
+    time.sleep(2) # wait for Nano to reboot
 
 #FPS counter variables
 frame_count = 0
@@ -76,7 +78,8 @@ def send_motor_command(motor, direction, speed):
     speed = min(speed, 255)
     speed = speed // 4
     command = (motor << 7) | (direction << 6) | speed
-    ser.write(bytes([command]))
+    if Motors:
+        ser.write(bytes([command]))
 
 def m(left, right, duration):
     left_direction = 1
@@ -171,7 +174,8 @@ while True:
         if w_red > 150:
             m(255, 255, 150)
             m(0, 0, 0)
-            print("Red detected, sleeping...")
+            if Debug:
+                print("Red detected, sleeping...")
             time.sleep(7)
             
     
@@ -179,14 +183,16 @@ while True:
     if w_blk < (ResX - 10) and w_blk > 60 and not Green_ignored:
         Green_ignored = True
         if h_blk > 70: 
-            print("Boosting: Turn without green")
+            if Debug:
+                print("Boosting: Turn without green")
             m(255, 255, 150)
             Green_ignored = False
     
 
     if not Green_ignored:
         if contours_grn_len > 1:
-            print("Turn 180 degrees")
+            if Debug:
+                print("Turn 180 degrees")
             m(255, -255, 900)
             m(0, 0, 0)
 
@@ -200,13 +206,15 @@ while True:
                 cv2.rectangle(Img_Cam, (x_grn, y_grn), (x_grn + w_grn, y_grn + h_grn), (255, 0, 0), 2)
                 
         elif w_blk > 150:
-            print("Boosting: Turn without green")
+            if Debug:
+                print("Boosting: Turn without green")
             m(255, 255, 500)
         
             
         if green_points:
             if all(point > centerx_blk for point in green_points):
-                print("Right")
+                if Debug:
+                    print("Right")
                 m(255, 240, 325)
                 m(255, -255, 400)
                 m(255, 255, 100)
@@ -214,7 +222,8 @@ while True:
                 green_points = []
                 
             elif all(point < centerx_blk for point in green_points):
-                print("Left")
+                if Debug:
+                    print("Left")
                 m(255, 240, 375)
                 m(-255, 255, 350)
                 m(255, 255, 100)
@@ -224,7 +233,8 @@ while True:
 
     if new_sec:
         if w_blk_old > w_blk * 0.95 and w_blk_old < w_blk * 1.05:
-            print("Boosting: Stuck")
+            if Debug:
+                print("Boosting: Stuck")
             m(-255, 255, 100)
             m(255, -255, 100)
             SENSITIVITY = 4
