@@ -75,28 +75,28 @@ w_blk_old = 0
 picam.start()
 
 #Some functions
-def send_motor_command(motor, diRecordtion, speed):
+def send_motor_command(motor, direction, speed):
     speed = min(speed, 255)
     speed = speed // 4
-    command = (motor << 7) | (diRecordtion << 6) | speed
+    command = (motor << 7) | (direction << 6) | speed
     if Motors:
         ser.write(bytes([command]))
 
 def m(left, right, duration):
-    left_diRecordtion = 1
+    left_direction = 1
     if left > 0:
-        left_diRecordtion = 0
-    right_diRecordtion = 1
+        left_direction = 0
+    right_direction = 1
     if right > 0:
-        right_diRecordtion = 0
-    send_motor_command(LEFT_MOTOR, left_diRecordtion, abs(left))
-    send_motor_command(RIGHT_MOTOR, right_diRecordtion, abs(right))
+        right_direction = 0
+    send_motor_command(LEFT_MOTOR, left_direction, abs(left))
+    send_motor_command(RIGHT_MOTOR, right_direction, abs(right))
     if duration > 0:
         time.sleep(duration / 1000)
         send_motor_command(LEFT_MOTOR, 1, 0)
         send_motor_command(RIGHT_MOTOR, 1, 0)
         
-#Recording Stuff
+#recing Stuff
 if Record:
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter('Debug.avi', fourcc, 120, (ResX, ResY))
@@ -176,7 +176,7 @@ try:
         if contours_red_len > 0:
             for i in range(contours_red_len):
                 x_red, y_red, w_red, h_red = cv2.boundingRect(contours_red[i])
-                cv2.Recordtangle(Img_Cam, (x_red, y_red), (x_red + w_red, y_red + h_red), (0, 255, 0), 2)
+                cv2.rectangle(Img_Cam, (x_red, y_red), (x_red + w_red, y_red + h_red), (0, 255, 0), 2)
                 
             if w_red > 150:
                 m(255, 255, 150)
@@ -210,7 +210,7 @@ try:
                     x_grn, y_grn, w_grn, h_grn = cv2.boundingRect(contours_grn[i])
                     centerx_grn = x_grn + (w_grn / 2)
                     green_points.append(centerx_grn)
-                    cv2.Recordtangle(Img_Cam, (x_grn, y_grn), (x_grn + w_grn, y_grn + h_grn), (255, 0, 0), 2)
+                    cv2.rectangle(Img_Cam, (x_grn, y_grn), (x_grn + w_grn, y_grn + h_grn), (255, 0, 0), 2)
                     
             elif w_blk > 150:
                 if Debug:
