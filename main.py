@@ -11,7 +11,7 @@ ResX, ResY = 1536, 96 #Set resolution here
 FPS = 200 #Set a FPS cap here
 Debug = False
 Show_Fps = True
-Motors = False
+Motors = True
 BASE_SPEED = 80
 SENSITIVITY = 3
 Raw_Cap_Mode = 1 #Set the picam SENSOR MODE here. '1' = 1532x864; '2' = 2304x1296; 3 = 4608x2592
